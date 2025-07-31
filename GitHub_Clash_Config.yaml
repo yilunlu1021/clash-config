@@ -141,20 +141,38 @@ proxy-groups:
 
 rules:
   # AI服务 - 走美国
+  # OpenAI 系列
   - DOMAIN-SUFFIX,openai.com,AI-Services
   - DOMAIN-SUFFIX,api.openai.com,AI-Services
   - DOMAIN-SUFFIX,chatgpt.com,AI-Services
-  - DOMAIN-SUFFIX,anthropic.com,AI-Services
-  - DOMAIN-SUFFIX,claude.ai,AI-Services
+  - DOMAIN-SUFFIX,codex.openai.com,AI-Services
   - DOMAIN-KEYWORD,openai,AI-Services
   
-  # Google AI服务 - 走美国 (必须在通用Google规则之前)
+  # Anthropic Claude
+  - DOMAIN-SUFFIX,anthropic.com,AI-Services
+  - DOMAIN-SUFFIX,claude.ai,AI-Services
+  
+  # Google AI服务 (必须在通用Google规则之前)
   - DOMAIN-SUFFIX,gemini.google.com,AI-Services
   - DOMAIN-SUFFIX,makersuite.google.com,AI-Services
   - DOMAIN-SUFFIX,ai.google.dev,AI-Services
   - DOMAIN-SUFFIX,generativelanguage.googleapis.com,AI-Services
   - DOMAIN-SUFFIX,bard.google.com,AI-Services
+  - DOMAIN-SUFFIX,veo.google.com,AI-Services
   - DOMAIN-KEYWORD,gemini,AI-Services
+  - DOMAIN-KEYWORD,veo,AI-Services
+  
+  # Cursor IDE
+  - DOMAIN-SUFFIX,cursor.com,AI-Services
+  - DOMAIN,api.cursor.com,AI-Services
+  
+  # Perplexity AI搜索
+  - DOMAIN-SUFFIX,perplexity.ai,AI-Services
+  - DOMAIN,api.perplexity.ai,AI-Services
+  
+  # Windsurf AI编程
+  - DOMAIN-SUFFIX,windsurf.com,AI-Services
+  - DOMAIN-SUFFIX,windsurf.ai,AI-Services
 
   # 流媒体 - 走香港
   - DOMAIN-SUFFIX,netflix.com,Streaming
