@@ -181,6 +181,13 @@ rules:
   - DOMAIN-SUFFIX,googleapis.com,AI-Services          # 通用API端点
   - DOMAIN-SUFFIX,googleusercontent.com,AI-Services   # 静态资源/图片CDN
   
+  # Google静态资源 (避免被GeoIP规则拦截)
+  - DOMAIN-SUFFIX,gstatic.com,AI-Services             # Google字体/静态资源
+  - DOMAIN-SUFFIX,google-analytics.com,AI-Services    # 分析服务
+  - DOMAIN-SUFFIX,googletagmanager.com,AI-Services    # 标签管理
+  - DOMAIN-SUFFIX,doubleclick.net,AI-Services         # Google广告服务
+  - DOMAIN-SUFFIX,googleadservices.com,AI-Services    # Google广告
+  
   # 关键字匹配 (兜底)
   - DOMAIN-KEYWORD,gemini,AI-Services
   - DOMAIN-KEYWORD,veo,AI-Services
