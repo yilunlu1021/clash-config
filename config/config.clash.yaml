@@ -1,0 +1,138 @@
+# Clash配置模板
+# 用于分流规则配置
+
+mixed-port: 7890
+allow-lan: true
+bind-address: '*'
+mode: rule
+log-level: info
+ipv6: false
+
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: redir-host
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - 8.8.8.8
+    - 1.1.1.1
+  fallback:
+    - 8.8.8.8
+    - 1.1.1.1
+    - tls://1.1.1.1:853
+    - tls://dns.google:853
+  fallback-filter:
+    geoip: true
+    ipcidr:
+      - 240.0.0.0/4
+      - 0.0.0.0/32
+
+proxies:
+  # 香港节点
+  - name: "HK_CN2_GIA_1"
+    type: vmess
+    server: 93.179.125.194
+    port: 443
+    uuid: your-uuid-here
+    alterId: 0
+    cipher: auto
+    tls: true
+    network: ws
+    ws-opts:
+      path: /
+      headers:
+        Host: www.microsoft.com
+
+  # 美国节点（预留）
+  - name: "US_AI_Node"
+    type: vmess
+    server: your-us-server-ip
+    port: 443
+    uuid: your-uuid-here
+    alterId: 0
+    cipher: auto
+    tls: true
+    network: ws
+    ws-opts:
+      path: /
+      headers:
+        Host: www.microsoft.com
+
+proxy-groups:
+  # 自动选择组
+  - name: "🚀 自动选择"
+    type: url-test
+    proxies:
+      - HK_CN2_GIA_1
+      - US_AI_Node
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+
+  # AI服务专用组
+  - name: "🤖 AI服务"
+    type: select
+    proxies:
+      - 🚀 自动选择
+      - HK_CN2_GIA_1
+      - US_AI_Node
+      - DIRECT
+
+  # 国外媒体组
+  - name: "📺 国外媒体"
+    type: select
+    proxies:
+      - 🚀 自动选择
+      - HK_CN2_GIA_1
+      - US_AI_Node
+      - DIRECT
+
+  # 国内直连组
+  - name: "🇨🇳 国内直连"
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 自动选择
+
+rules:
+  # AI服务规则
+  - DOMAIN-SUFFIX,openai.com,🤖 AI服务
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI服务
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI服务
+  - DOMAIN-SUFFIX,google.com,🤖 AI服务
+  - DOMAIN-SUFFIX,github.com,🤖 AI服务
+  - DOMAIN-SUFFIX,stackoverflow.com,🤖 AI服务
+  - DOMAIN-SUFFIX,huggingface.co,🤖 AI服务
+  - DOMAIN-SUFFIX,replicate.com,🤖 AI服务
+  - DOMAIN-SUFFIX,perplexity.ai,🤖 AI服务
+  - DOMAIN-SUFFIX,notion.com,🤖 AI服务
+  - DOMAIN-SUFFIX,arxiv.org,🤖 AI服务
+
+  # 国外媒体规则
+  - DOMAIN-SUFFIX,netflix.com,📺 国外媒体
+  - DOMAIN-SUFFIX,youtube.com,📺 国外媒体
+  - DOMAIN-SUFFIX,disney.com,📺 国外媒体
+  - DOMAIN-SUFFIX,spotify.com,📺 国外媒体
+  - DOMAIN-SUFFIX,twitter.com,📺 国外媒体
+  - DOMAIN-SUFFIX,facebook.com,📺 国外媒体
+  - DOMAIN-SUFFIX,instagram.com,📺 国外媒体
+
+  # 国内直连规则
+  - DOMAIN-SUFFIX,baidu.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,qq.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,taobao.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,tmall.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,alibaba.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,jd.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,weibo.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,zhihu.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,bilibili.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,douyin.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,163.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,sina.com.cn,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,sohu.com,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,edu.cn,🇨🇳 国内直连
+  - DOMAIN-SUFFIX,gov.cn,🇨🇳 国内直连
+
+  # 最终规则
+  - MATCH,🚀 自动选择 

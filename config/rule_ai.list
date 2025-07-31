@@ -1,0 +1,69 @@
+# AI服务域名列表
+# 用于Clash分流规则配置
+
+# OpenAI相关
+openai.com
+api.openai.com
+platform.openai.com
+chat.openai.com
+help.openai.com
+*.openai.com
+
+# Anthropic相关
+claude.ai
+api.anthropic.com
+console.anthropic.com
+*.anthropic.com
+
+# Google AI相关
+generativelanguage.googleapis.com
+ai.google.dev
+bard.google.com
+*.google.com
+
+# Microsoft AI相关
+copilot.microsoft.com
+www.bing.com
+*.bing.com
+*.microsoft.com
+
+# 其他AI服务
+perplexity.ai
+api.perplexity.ai
+*.perplexity.ai
+
+notion.so
+api.notion.com
+*.notion.com
+
+github.com
+api.github.com
+*.github.com
+
+# 学术和科研
+arxiv.org
+scholar.google.com
+*.arxiv.org
+
+# 代码相关
+stackoverflow.com
+api.stackoverflow.com
+*.stackoverflow.com
+
+# 开发工具
+npmjs.com
+registry.npmjs.org
+*.npmjs.com
+
+# 其他常用AI服务
+huggingface.co
+api.huggingface.co
+*.huggingface.co
+
+replicate.com
+api.replicate.com
+*.replicate.com
+
+# 本地AI服务（如果有）
+localhost
+127.0.0.1 
