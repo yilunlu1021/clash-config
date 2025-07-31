@@ -158,13 +158,30 @@ rules:
   - DOMAIN-SUFFIX,sandbox.api.anthropic.com,AI-Services
   - DOMAIN-SUFFIX,claude.ai,AI-Services
   
-  # Google AI服务 (必须在通用Google规则之前)
-  - DOMAIN-SUFFIX,gemini.google.com,AI-Services
-  - DOMAIN-SUFFIX,makersuite.google.com,AI-Services
-  - DOMAIN-SUFFIX,ai.google.dev,AI-Services
-  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,AI-Services
-  - DOMAIN-SUFFIX,bard.google.com,AI-Services
-  - DOMAIN-SUFFIX,veo.google.com,AI-Services
+  # Google AI 全套服务 (根据专家建议，关键域名优先级最高)
+  # Gemini Web UI & API
+  - DOMAIN,gemini.google.com,AI-Services              # Gemini主站
+  - DOMAIN,aistudio.google.com,AI-Services            # Google AI Studio (新版)
+  - DOMAIN-SUFFIX,makersuite.google.com,AI-Services   # AI Studio (旧版)
+  - DOMAIN,generativelanguage.googleapis.com,AI-Services  # 唯一官方API端点
+  
+  # OAuth & 账号验证 (关键登录链路)
+  - DOMAIN,oauth2.googleapis.com,AI-Services          # OAuth令牌交换
+  - DOMAIN-SUFFIX,accounts.google.com,AI-Services     # Google账号登录
+  - DOMAIN-SUFFIX,clients6.google.com,AI-Services     # OAuth客户端
+  
+  # 开发者资源 & 未来端点
+  - DOMAIN-SUFFIX,ai.google.dev,AI-Services           # 官方文档/代码片段
+  - DOMAIN,aiplatform.googleapis.com,AI-Services      # Vertex AI Gemini
+  
+  # 其他Google AI服务
+  - DOMAIN-SUFFIX,bard.google.com,AI-Services         # Bard (历史)
+  - DOMAIN-SUFFIX,veo.google.com,AI-Services          # Veo视频模型
+  - DOMAIN-SUFFIX,withgoogle.com,AI-Services          # Google服务套件
+  - DOMAIN-SUFFIX,googleapis.com,AI-Services          # 通用API端点
+  - DOMAIN-SUFFIX,googleusercontent.com,AI-Services   # 静态资源/图片CDN
+  
+  # 关键字匹配 (兜底)
   - DOMAIN-KEYWORD,gemini,AI-Services
   - DOMAIN-KEYWORD,veo,AI-Services
   
@@ -236,8 +253,8 @@ rules:
 
   # Google服务 - 走代理 (除AI服务外的其他Google服务)
   - DOMAIN-SUFFIX,google.com,Foreign-Sites
-  - DOMAIN-SUFFIX,googleapis.com,Foreign-Sites
-  - DOMAIN-SUFFIX,googleusercontent.com,Foreign-Sites
+  # googleapis.com 已移至 AI-Services (避免规则冲突)
+  # googleusercontent.com 已移至 AI-Services (避免规则冲突)
   - DOMAIN-SUFFIX,gmail.com,Foreign-Sites
   - DOMAIN-SUFFIX,googledrive.com,Foreign-Sites
 
