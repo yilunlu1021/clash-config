@@ -177,6 +177,9 @@ rules:
   - DOMAIN-SUFFIX,googleapis.com,AI-Services          # 通用API端点
   - DOMAIN-SUFFIX,googleusercontent.com,AI-Services   # 静态资源/图片CDN
   
+  # Google全域名 (确保所有Google服务走美国)
+  - DOMAIN-SUFFIX,google.com,AI-Services              # Google全域名覆盖
+  
   # Google静态资源 (避免被GeoIP规则拦截)
   - DOMAIN-SUFFIX,gstatic.com,AI-Services             # Google字体/静态资源
   - DOMAIN-SUFFIX,google-analytics.com,AI-Services    # 分析服务
