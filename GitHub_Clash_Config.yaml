@@ -164,9 +164,13 @@ rules:
   - DOMAIN-KEYWORD,gemini,AI-Services
   - DOMAIN-KEYWORD,veo,AI-Services
   
-  # Cursor IDE
+  # Cursor IDE (添加更多子域名)
   - DOMAIN-SUFFIX,cursor.com,AI-Services
-  - DOMAIN,api.cursor.com,AI-Services
+  - DOMAIN-SUFFIX,api.cursor.com,AI-Services
+  - DOMAIN-SUFFIX,download.cursor.com,AI-Services
+  - DOMAIN-SUFFIX,auth.cursor.com,AI-Services
+  - DOMAIN-SUFFIX,app.cursor.com,AI-Services
+  - DOMAIN-KEYWORD,cursor,AI-Services
   
   # Perplexity AI搜索 (底层调用GPT，需要美国IP)
   - DOMAIN-SUFFIX,perplexity.ai,AI-Services
