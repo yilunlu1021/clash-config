@@ -150,6 +150,7 @@ rules:
   
   # Anthropic Claude
   - DOMAIN-SUFFIX,anthropic.com,AI-Services
+  - DOMAIN-SUFFIX,api.anthropic.com,AI-Services
   - DOMAIN-SUFFIX,claude.ai,AI-Services
   
   # Google AI服务 (必须在通用Google规则之前)
@@ -166,9 +167,9 @@ rules:
   - DOMAIN-SUFFIX,cursor.com,AI-Services
   - DOMAIN,api.cursor.com,AI-Services
   
-  # Perplexity AI搜索
+  # Perplexity AI搜索 (底层调用GPT，需要美国IP)
   - DOMAIN-SUFFIX,perplexity.ai,AI-Services
-  - DOMAIN,api.perplexity.ai,AI-Services
+  - DOMAIN-SUFFIX,api.perplexity.ai,AI-Services
   
   # Windsurf AI编程
   - DOMAIN-SUFFIX,windsurf.com,AI-Services
