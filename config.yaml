@@ -187,6 +187,7 @@ rules:
   - DOMAIN-SUFFIX,googletagmanager.com,AI-Services    # 标签管理
   - DOMAIN-SUFFIX,doubleclick.net,AI-Services         # Google广告服务
   - DOMAIN-SUFFIX,googleadservices.com,AI-Services    # Google广告
+  - DOMAIN-SUFFIX,play.google.com,AI-Services         # Google Play服务
   
   # 关键字匹配 (兜底)
   - DOMAIN-KEYWORD,gemini,AI-Services
