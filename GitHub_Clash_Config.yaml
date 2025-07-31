@@ -1,0 +1,215 @@
+# 双服务器智能分流配置 - 优化工作版
+# 基于测试成功的简化配置改进
+
+port: 7890
+socks-port: 7891
+allow-lan: true
+mode: rule
+log-level: info
+external-controller: 127.0.0.1:9090
+
+# 优化DNS配置 (简化版)
+dns:
+  enable: true
+  enhanced-mode: redir-host  # 改为更稳定的模式
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+  fallback:
+    - 8.8.4.4
+    - 1.0.0.1
+
+proxies:
+  # 美国西雅图服务器 - AI专用
+  - name: "US-Seattle-Reality"
+    type: vless
+    server: 104.247.120.132
+    port: 443
+    uuid: fbe68161-340d-4721-aff4-b0efc1d03bdb
+    flow: xtls-rprx-vision
+    tls: true
+    network: tcp
+    reality-opts:
+      public-key: 0bMB_OETOiU-J2lr3aoHdBfOIiJzrDYZH1mmYa3_lhU
+      short-id: e22fc234aa2b0560
+    client-fingerprint: chrome
+    servername: www.apple.com
+
+  - name: "US-Seattle-Hysteria2"
+    type: hysteria2
+    server: 104.247.120.132
+    port: 443
+    password: SeattleAI2025_1da9543d07a41781
+    obfs: salamander
+    obfs-password: homeRouter_2ca57d650199
+    sni: www.apple.com
+    skip-cert-verify: true
+    up: 300
+    down: 500
+
+  # 香港CMI服务器 - 流媒体专用
+  - name: "HK-CMI-Reality"
+    type: vless
+    server: 38.22.93.165
+    port: 443
+    uuid: 5dc648a5-96a6-4ad8-a6e3-d0bb6f00850d
+    flow: xtls-rprx-vision
+    tls: true
+    network: tcp
+    reality-opts:
+      public-key: FvvA271bTh51H7d69nmyriujFP0agStXM4dXEkK46xc
+      short-id: d35b027ab42e9018
+    client-fingerprint: chrome
+    servername: www.binance.com
+
+  - name: "HK-CMI-Hysteria2"
+    type: hysteria2
+    server: 38.22.93.165
+    port: 8443
+    password: HKBinance2025_a946373f443e2c4c
+    obfs: salamander
+    obfs-password: cmi_90a632b97eac
+    sni: www.binance.com
+    skip-cert-verify: true
+    up: 300
+    down: 500
+
+proxy-groups:
+  # AI服务专用组
+  - name: "AI-Services"
+    type: select
+    proxies:
+      - "US-Seattle-Hysteria2"  # 优先使用Hysteria2
+      - "US-Seattle-Reality"
+
+  # 流媒体专用组
+  - name: "Streaming"
+    type: select
+    proxies:
+      - "HK-CMI-Hysteria2"  # 优先使用Hysteria2
+      - "HK-CMI-Reality"
+      - "US-Seattle-Hysteria2"
+
+  # Binance交易专用
+  - name: "Binance-Trading"
+    type: select
+    proxies:
+      - "HK-CMI-Reality"
+      - "HK-CMI-Hysteria2"
+
+  # Apple服务
+  - name: "Apple-Services"
+    type: select
+    proxies:
+      - "US-Seattle-Reality"
+      - "HK-CMI-Reality"
+      - "DIRECT"
+
+  # 国外社交媒体
+  - name: "Social-Media"
+    type: select
+    proxies:
+      - "Auto-Select"
+      - "HK-CMI-Reality"
+      - "US-Seattle-Reality"
+
+  # 智能选择组
+  - name: "Auto-Select"
+    type: url-test
+    proxies:
+      - "HK-CMI-Hysteria2"
+      - "US-Seattle-Hysteria2"
+      - "HK-CMI-Reality"
+      - "US-Seattle-Reality"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 120
+    timeout: 3000
+
+  # 国外网站
+  - name: "Foreign-Sites"
+    type: select
+    proxies:
+      - "Auto-Select"
+      - "HK-CMI-Hysteria2"
+      - "US-Seattle-Hysteria2"
+
+  # 国内直连
+  - name: "China-Direct"
+    type: select
+    proxies:
+      - "DIRECT"
+
+rules:
+  # AI服务 - 走美国
+  - DOMAIN-SUFFIX,openai.com,AI-Services
+  - DOMAIN-SUFFIX,api.openai.com,AI-Services
+  - DOMAIN-SUFFIX,chatgpt.com,AI-Services
+  - DOMAIN-SUFFIX,anthropic.com,AI-Services
+  - DOMAIN-SUFFIX,claude.ai,AI-Services
+  - DOMAIN-KEYWORD,openai,AI-Services
+
+  # 流媒体 - 走香港
+  - DOMAIN-SUFFIX,netflix.com,Streaming
+  - DOMAIN-SUFFIX,youtube.com,Streaming
+  - DOMAIN-SUFFIX,googlevideo.com,Streaming
+  - DOMAIN-SUFFIX,ytimg.com,Streaming
+  - DOMAIN-SUFFIX,disney.com,Streaming
+  - DOMAIN-SUFFIX,hulu.com,Streaming
+  - DOMAIN-SUFFIX,telegram.org,Streaming
+  - DOMAIN-SUFFIX,t.me,Streaming
+  - DOMAIN-KEYWORD,telegram,Streaming
+
+  # Binance交易 - 走香港
+  - DOMAIN-SUFFIX,binance.com,Binance-Trading
+  - DOMAIN-SUFFIX,bnbstatic.com,Binance-Trading
+  - DOMAIN-KEYWORD,binance,Binance-Trading
+
+  # Apple服务
+  - DOMAIN-SUFFIX,apple.com,Apple-Services
+  - DOMAIN-SUFFIX,icloud.com,Apple-Services
+  - DOMAIN-SUFFIX,appstore.com,Apple-Services
+
+  # 国外社交媒体
+  - DOMAIN-SUFFIX,twitter.com,Social-Media
+  - DOMAIN-SUFFIX,x.com,Social-Media
+  - DOMAIN-SUFFIX,instagram.com,Social-Media
+  - DOMAIN-SUFFIX,facebook.com,Social-Media
+  - DOMAIN-SUFFIX,linkedin.com,Social-Media
+  - DOMAIN-SUFFIX,reddit.com,Social-Media
+
+  # 国内社交媒体和通讯 - 直连
+  - DOMAIN-SUFFIX,qq.com,China-Direct
+  - DOMAIN-SUFFIX,weixin.qq.com,China-Direct
+  - DOMAIN-KEYWORD,wechat,China-Direct
+  - DOMAIN-SUFFIX,xiaohongshu.com,China-Direct
+  - DOMAIN-SUFFIX,xhscdn.com,China-Direct
+  - DOMAIN-SUFFIX,bilibili.com,China-Direct
+  - DOMAIN-SUFFIX,bilivideo.com,China-Direct
+  - DOMAIN-SUFFIX,douyin.com,China-Direct
+  - DOMAIN-SUFFIX,douyinpic.com,China-Direct
+  - DOMAIN-SUFFIX,douyincdn.com,China-Direct
+  - DOMAIN-KEYWORD,douyin,China-Direct
+
+  # 国内网站 - 直连
+  - DOMAIN-SUFFIX,cn,China-Direct
+  - DOMAIN-SUFFIX,baidu.com,China-Direct
+  - DOMAIN-SUFFIX,taobao.com,China-Direct
+  - DOMAIN-SUFFIX,jd.com,China-Direct
+  - DOMAIN-SUFFIX,alipay.com,China-Direct
+  - DOMAIN-KEYWORD,-cn,China-Direct
+
+  # Google服务 - 走代理
+  - DOMAIN-SUFFIX,google.com,Foreign-Sites
+  - DOMAIN-SUFFIX,googleapis.com,Foreign-Sites
+  - DOMAIN-SUFFIX,googleusercontent.com,Foreign-Sites
+
+  # 本地网络
+  - IP-CIDR,192.168.0.0/16,DIRECT
+  - IP-CIDR,10.0.0.0/8,DIRECT
+  - IP-CIDR,172.16.0.0/12,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT
+
+  # 默认规则
+  - GEOIP,CN,China-Direct
+  - MATCH,Foreign-Sites
+

@@ -1,0 +1,26 @@
+# 忽略临时文件
+*.tmp
+*.log
+.DS_Store
+*_backup*
+*_test*
+
+# 忽略敏感文件
+.env
+*.key
+*.pem
+
+# 忽略虚拟环境
+venv/
+.venv/
+
+# 忽略临时配置
+Clash_Debug_Simple.yaml
+*_backup.yaml
+*_test.yaml
+SERVER_DIAGNOSIS_REPORT.md
+
+# 保留重要配置
+!GitHub_Clash_Config.yaml
+!Clash_Optimized_Working.yaml
+!config.yaml
