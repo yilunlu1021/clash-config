@@ -130,8 +130,8 @@ proxy-groups:
     type: select
     proxies:
       - "Auto-Select"
-      - "HK-CMI-Hysteria2"
       - "US-Seattle-Hysteria2"
+      - "HK-CMI-Hysteria2"
 
   # 国内直连
   - name: "China-Direct"
@@ -147,6 +147,14 @@ rules:
   - DOMAIN-SUFFIX,anthropic.com,AI-Services
   - DOMAIN-SUFFIX,claude.ai,AI-Services
   - DOMAIN-KEYWORD,openai,AI-Services
+  
+  # Google AI服务 - 走美国 (必须在通用Google规则之前)
+  - DOMAIN-SUFFIX,gemini.google.com,AI-Services
+  - DOMAIN-SUFFIX,makersuite.google.com,AI-Services
+  - DOMAIN-SUFFIX,ai.google.dev,AI-Services
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,AI-Services
+  - DOMAIN-SUFFIX,bard.google.com,AI-Services
+  - DOMAIN-KEYWORD,gemini,AI-Services
 
   # 流媒体 - 走香港
   - DOMAIN-SUFFIX,netflix.com,Streaming
@@ -198,10 +206,12 @@ rules:
   - DOMAIN-SUFFIX,alipay.com,China-Direct
   - DOMAIN-KEYWORD,-cn,China-Direct
 
-  # Google服务 - 走代理
+  # Google服务 - 走代理 (除AI服务外的其他Google服务)
   - DOMAIN-SUFFIX,google.com,Foreign-Sites
   - DOMAIN-SUFFIX,googleapis.com,Foreign-Sites
   - DOMAIN-SUFFIX,googleusercontent.com,Foreign-Sites
+  - DOMAIN-SUFFIX,gmail.com,Foreign-Sites
+  - DOMAIN-SUFFIX,googledrive.com,Foreign-Sites
 
   # 本地网络
   - IP-CIDR,192.168.0.0/16,DIRECT
