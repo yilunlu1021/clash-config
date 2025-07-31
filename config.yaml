@@ -151,6 +151,7 @@ rules:
   # Anthropic Claude
   - DOMAIN-SUFFIX,anthropic.com,AI-Services
   - DOMAIN-SUFFIX,api.anthropic.com,AI-Services
+  - DOMAIN-SUFFIX,sandbox.api.anthropic.com,AI-Services
   - DOMAIN-SUFFIX,claude.ai,AI-Services
   
   # Google AI服务 (必须在通用Google规则之前)
