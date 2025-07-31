@@ -75,12 +75,16 @@ proxies:
     down: 500
 
 proxy-groups:
-  # AI服务专用组
+  # AI服务专用组 (强制美国，自动测试)
   - name: "AI-Services"
-    type: select
+    type: url-test
     proxies:
       - "US-Seattle-Hysteria2"  # 优先使用Hysteria2
       - "US-Seattle-Reality"
+    url: "https://api.openai.com/v1/models"
+    interval: 60
+    timeout: 5000
+    tolerance: 200
 
   # 流媒体专用组
   - name: "Streaming"
