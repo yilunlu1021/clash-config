@@ -1,0 +1,19 @@
+=== 香港CMI服务器配置（已修复）===
+
+HK CMI Reality配置:
+服务器: 38.22.93.165:443
+协议: VLESS + Reality
+UUID: 5dc648a5-96a6-4ad8-a6e3-d0bb6f00850d
+Flow: xtls-rprx-vision
+Public Key: FvvA271bTh51H7d69nmyriujFP0agStXM4dXEkK46xc
+Short ID: d35b027ab42e9018
+伪装站点: www.binance.com
+服务器名: www.binance.com, accounts.binance.com
+
+HK CMI Hysteria2配置:
+服务器: 38.22.93.165:8443
+协议: Hysteria2
+密码: HKBinance2025_a946373f443e2c4c
+混淆密码: cmi_90a632b97eac
+混淆类型: salamander
+伪装站点: www.binance.com

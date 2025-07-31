@@ -1,0 +1,142 @@
+# 西雅图原生家庭IP VPS - Clash Meta配置 (修复版)
+# 更新时间: 2025-07-31 14:30:00
+
+port: 7890
+socks-port: 7891
+allow-lan: true
+mode: rule
+log-level: info
+external-controller: 127.0.0.1:9090
+
+dns:
+  enable: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+  fallback:
+    - 8.8.4.4
+    - 1.0.0.1
+
+proxies:
+  - name: "🇺🇸 Seattle-Reality"
+    type: vless
+    server: 104.247.120.132
+    port: 443
+    uuid: fbe68161-340d-4721-aff4-b0efc1d03bdb
+    flow: xtls-rprx-vision
+    tls: true
+    network: tcp
+    reality-opts:
+      public-key: 0bMB_OETOiU-J2lr3aoHdBfOIiJzrDYZH1mmYa3_lhU
+      short-id: e22fc234aa2b0560
+    client-fingerprint: chrome
+    servername: www.apple.com
+
+  - name: "🇺🇸 Seattle-Hysteria2"
+    type: hysteria2
+    server: 104.247.120.132
+    port: 443
+    password: SeattleAI2025_1da9543d07a41781
+    obfs: salamander
+    obfs-password: homeRouter_2ca57d650199
+    sni: www.apple.com
+    skip-cert-verify: true
+
+proxy-groups:
+  - name: "🚀 节点选择"
+    type: select
+    proxies:
+      - "🇺🇸 Seattle-Reality"
+      - "🇺🇸 Seattle-Hysteria2"
+      - "⚡ 自动选择"
+      - "DIRECT"
+
+  - name: "⚡ 自动选择"
+    type: url-test
+    proxies:
+      - "🇺🇸 Seattle-Reality"
+      - "🇺🇸 Seattle-Hysteria2"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 300
+
+  - name: "🤖 AI服务"
+    type: select
+    proxies:
+      - "🇺🇸 Seattle-Reality"
+      - "🇺🇸 Seattle-Hysteria2"
+      - "⚡ 自动选择"
+
+  - name: "📺 流媒体"
+    type: select
+    proxies:
+      - "🇺🇸 Seattle-Reality"
+      - "🇺🇸 Seattle-Hysteria2"
+      - "⚡ 自动选择"
+
+  - name: "🍎 Apple服务"
+    type: select
+    proxies:
+      - "DIRECT"
+      - "🚀 节点选择"
+
+  - name: "🇨🇳 国内网站"
+    type: select
+    proxies:
+      - "DIRECT"
+      - "🚀 节点选择"
+
+  - name: "🌍 国外网站"
+    type: select
+    proxies:
+      - "🚀 节点选择"
+      - "⚡ 自动选择"
+      - "DIRECT"
+
+rules:
+  # AI服务
+  - DOMAIN-SUFFIX,openai.com,🤖 AI服务
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI服务
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI服务
+  - DOMAIN-KEYWORD,openai,🤖 AI服务
+  - DOMAIN-KEYWORD,chatgpt,🤖 AI服务
+  
+  # 流媒体
+  - DOMAIN-SUFFIX,netflix.com,📺 流媒体
+  - DOMAIN-SUFFIX,youtube.com,📺 流媒体
+  - DOMAIN-SUFFIX,googlevideo.com,📺 流媒体
+  - DOMAIN-SUFFIX,ytimg.com,📺 流媒体
+  - DOMAIN-SUFFIX,hulu.com,📺 流媒体
+  - DOMAIN-SUFFIX,disneyplus.com,📺 流媒体
+  
+  # Apple服务
+  - DOMAIN-SUFFIX,apple.com,🍎 Apple服务
+  - DOMAIN-SUFFIX,icloud.com,🍎 Apple服务
+  - DOMAIN-SUFFIX,apple-cloudkit.com,🍎 Apple服务
+  
+  # 国内网站直连
+  - DOMAIN-SUFFIX,cn,🇨🇳 国内网站
+  - DOMAIN-KEYWORD,-cn,🇨🇳 国内网站
+  - DOMAIN-SUFFIX,baidu.com,🇨🇳 国内网站
+  - DOMAIN-SUFFIX,qq.com,🇨🇳 国内网站
+  - DOMAIN-SUFFIX,weixin.qq.com,🇨🇳 国内网站
+  - DOMAIN-SUFFIX,taobao.com,🇨🇳 国内网站
+  - DOMAIN-SUFFIX,jd.com,🇨🇳 国内网站
+  
+  # 局域网直连
+  - IP-CIDR,192.168.0.0/16,DIRECT
+  - IP-CIDR,10.0.0.0/8,DIRECT
+  - IP-CIDR,172.16.0.0/12,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT
+  
+  # 国外网站
+  - DOMAIN-SUFFIX,google.com,🌍 国外网站
+  - DOMAIN-SUFFIX,facebook.com,🌍 国外网站
+  - DOMAIN-SUFFIX,twitter.com,🌍 国外网站
+  - DOMAIN-SUFFIX,instagram.com,🌍 国外网站
+  - DOMAIN-SUFFIX,github.com,🌍 国外网站
+  
+  # 默认规则
+  - GEOIP,CN,🇨🇳 国内网站
+  - MATCH,🌍 国外网站
