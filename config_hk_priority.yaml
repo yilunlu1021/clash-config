@@ -1,6 +1,6 @@
-# 双服务器智能分流配置 - 优化工作版
-# 基于测试成功的简化配置改进
-# 最后更新: 2025-07-31 23:12:39 - 添加google.com全域名到AI-Services
+# 香港节点优先版本 - 解决美国VPS Google访问问题
+# 基于测试发现美国节点无法访问Google服务，改为香港节点优先
+# 最后更新: 2025-08-02 修复美国节点Google访问问题
 
 mixed-port: 7890          # HTTP+SOCKS+TUN复用端口
 allow-lan: true
@@ -70,7 +70,7 @@ rule-providers:
     interval: 86400
 
 proxies:
-  # 美国西雅图服务器 - AI专用
+  # 美国西雅图服务器 - AI专用（当前网络异常）
   - name: "US-Seattle-Reality"
     type: vless
     server: 104.247.120.132
@@ -97,7 +97,7 @@ proxies:
     up: 300
     down: 500
 
-  # 香港CMI服务器 - 流媒体专用
+  # 香港CMI服务器 - 流媒体专用（现用于AI服务）
   - name: "HK-CMI-Reality"
     type: vless
     server: 38.22.93.165
@@ -125,17 +125,17 @@ proxies:
     down: 500
 
 proxy-groups:
-  # AI服务专用组 - 香港节点优先（美国节点网络异常）
+  # AI服务专用组 - 香港节点优先（解决美国节点Google访问问题）
   - name: "AI-Services"
     type: fallback            # 自动切换到健康节点
     url: http://www.gstatic.com/generate_204
     interval: 300
     timeout: 3000
     proxies:
-      - "HK-CMI-Hysteria2"     # 香港节点优先（网络更稳定）
+      - "HK-CMI-Hysteria2"     # 香港节点优先（网络稳定）
       - "HK-CMI-Reality"       # 香港备用
-      - "US-Seattle-Hysteria2"  # 美国备用
-      - "US-Seattle-Reality"
+      - "US-Seattle-Hysteria2"  # 美国备用（当前有问题）
+      - "US-Seattle-Reality"   # 美国备用
 
   # 流媒体专用组
   - name: "Streaming"
@@ -156,8 +156,8 @@ proxy-groups:
   - name: "Apple-Services"
     type: select
     proxies:
+      - "HK-CMI-Reality"    # 改为香港优先
       - "US-Seattle-Reality"
-      - "HK-CMI-Reality"
       - "DIRECT"
 
   # 国外社交媒体
@@ -173,8 +173,8 @@ proxy-groups:
     type: url-test
     proxies:
       - "HK-CMI-Hysteria2"
+      - "HK-CMI-Reality"     # 香港节点优先
       - "US-Seattle-Hysteria2"
-      - "HK-CMI-Reality"
       - "US-Seattle-Reality"
     url: "http://www.gstatic.com/generate_204"
     interval: 300             # 增加测试间隔减少负载
@@ -186,8 +186,8 @@ proxy-groups:
     type: select
     proxies:
       - "Auto-Select"
+      - "HK-CMI-Hysteria2"   # 香港优先
       - "US-Seattle-Hysteria2"
-      - "HK-CMI-Hysteria2"
 
   # 国内直连
   - name: "China-Direct"
@@ -293,4 +293,3 @@ rules:
   # 默认规则
   - GEOIP,CN,China-Direct
   - MATCH,Foreign-Sites
-
