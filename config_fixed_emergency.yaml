@@ -1,6 +1,6 @@
-# 双服务器智能分流配置 - 优化工作版
-# 基于测试成功的简化配置改进
-# 最后更新: 2025-07-31 23:12:39 - 添加google.com全域名到AI-Services
+# 应急修复版本 - 内置Google规则，不依赖外部规则提供器
+# 解决rule provider 404错误的临时方案
+# 最后更新: 2025-08-02 修复规则提供器404错误
 
 mixed-port: 7890          # HTTP+SOCKS+TUN复用端口
 allow-lan: true
@@ -45,29 +45,6 @@ dns:
     - +.lan
     - +.local
   ipv6: true                      # 启用IPv6支持
-
-# 规则提供器 - 使用可靠的Loyalsoldier源
-rule-providers:
-  Google:
-    type: http
-    behavior: domain
-    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/google.txt"
-    path: ./providers/google.yaml
-    interval: 86400
-  
-  OpenAI:
-    type: http
-    behavior: domain  
-    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/openai.txt"
-    path: ./providers/openai.yaml
-    interval: 86400
-
-  Proxy:
-    type: http
-    behavior: domain
-    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt" 
-    path: ./providers/proxy.yaml
-    interval: 86400
 
 proxies:
   # 美国西雅图服务器 - AI专用
@@ -194,25 +171,48 @@ proxy-groups:
       - "DIRECT"
 
 rules:
-  # AI服务规则 - 优先使用规则提供器 (自动更新，覆盖完整)
-  - RULE-SET,Google,AI-Services
-  - RULE-SET,OpenAI,AI-Services
-  - RULE-SET,Proxy,AI-Services
+  # AI服务规则 - 内置完整Google域名列表 (避免规则提供器404)
   
-  # 手动补充AI服务 (规则提供器未覆盖的)
+  # OpenAI 系列
+  - DOMAIN-SUFFIX,openai.com,AI-Services
+  - DOMAIN-SUFFIX,api.openai.com,AI-Services
+  - DOMAIN-SUFFIX,chatgpt.com,AI-Services
+  - DOMAIN-SUFFIX,codex.openai.com,AI-Services
+  - DOMAIN-KEYWORD,openai,AI-Services
+  
   # Anthropic Claude
   - DOMAIN-SUFFIX,anthropic.com,AI-Services
   - DOMAIN-SUFFIX,api.anthropic.com,AI-Services
   - DOMAIN-SUFFIX,sandbox.api.anthropic.com,AI-Services
   - DOMAIN-SUFFIX,claude.ai,AI-Services
   
-  # 手动补充关键Google AI域名 (规则提供器可能未覆盖)
-  - DOMAIN,gemini.google.com,AI-Services              # Gemini主站
-  - DOMAIN,aistudio.google.com,AI-Services            # Google AI Studio
-  - DOMAIN,generativelanguage.googleapis.com,AI-Services  # Gemini API端点
-  - DOMAIN-KEYWORD,gemini,AI-Services                 # 兜底匹配
+  # Google AI 完整域名列表 (内置，避免404错误)
+  - DOMAIN,gemini.google.com,AI-Services
+  - DOMAIN,aistudio.google.com,AI-Services
+  - DOMAIN,makersuite.google.com,AI-Services
+  - DOMAIN,generativelanguage.googleapis.com,AI-Services
+  - DOMAIN,ai.google.dev,AI-Services
+  - DOMAIN,bard.google.com,AI-Services
+  - DOMAIN,oauth2.googleapis.com,AI-Services
+  - DOMAIN-SUFFIX,accounts.google.com,AI-Services
+  - DOMAIN-SUFFIX,clients6.google.com,AI-Services
+  - DOMAIN,aiplatform.googleapis.com,AI-Services
+  - DOMAIN-SUFFIX,googleapis.com,AI-Services
+  - DOMAIN-SUFFIX,googleusercontent.com,AI-Services
+  - DOMAIN-SUFFIX,gstatic.com,AI-Services
+  - DOMAIN-SUFFIX,google-analytics.com,AI-Services
+  - DOMAIN-SUFFIX,googletagmanager.com,AI-Services
+  - DOMAIN-SUFFIX,doubleclick.net,AI-Services
+  - DOMAIN-SUFFIX,googleadservices.com,AI-Services
+  - DOMAIN-SUFFIX,googlesyndication.com,AI-Services
+  - DOMAIN-SUFFIX,googletagservices.com,AI-Services
+  - DOMAIN-SUFFIX,google.com,AI-Services
   
-  # Cursor IDE (添加更多子域名)
+  # 关键字匹配 (兜底)
+  - DOMAIN-KEYWORD,gemini,AI-Services
+  - DOMAIN-KEYWORD,googleapis,AI-Services
+  
+  # Cursor IDE
   - DOMAIN-SUFFIX,cursor.com,AI-Services
   - DOMAIN-SUFFIX,api.cursor.com,AI-Services
   - DOMAIN-SUFFIX,download.cursor.com,AI-Services
@@ -220,7 +220,7 @@ rules:
   - DOMAIN-SUFFIX,app.cursor.com,AI-Services
   - DOMAIN-KEYWORD,cursor,AI-Services
   
-  # Perplexity AI搜索 (底层调用GPT，需要美国IP)
+  # Perplexity AI搜索
   - DOMAIN-SUFFIX,perplexity.ai,AI-Services
   - DOMAIN-SUFFIX,api.perplexity.ai,AI-Services
   
@@ -291,4 +291,3 @@ rules:
   # 默认规则
   - GEOIP,CN,China-Direct
   - MATCH,Foreign-Sites
-
