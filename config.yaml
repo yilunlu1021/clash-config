@@ -2,23 +2,72 @@
 # 基于测试成功的简化配置改进
 # 最后更新: 2025-07-31 23:12:39 - 添加google.com全域名到AI-Services
 
-port: 7890
-socks-port: 7891
+mixed-port: 7890          # HTTP+SOCKS+TUN复用端口
 allow-lan: true
 mode: rule
 log-level: info
 external-controller: 127.0.0.1:9090
 
-# 优化DNS配置 (简化版)
+# 流量嗅探 - 确保QUIC/UDP被正确识别和代理
+sniffer:
+  enable: true
+  sniff:
+    TLS:
+      ports: [443]
+      override-destination: true
+    HTTP:
+      ports: [80, 443]
+      override-destination: false
+  force-dns-mapping: true
+  parse-pure-ip: true
+
+# TUN模式 - 确保所有UDP/TCP流量进入代理隧道
+tun:
+  enable: true
+  stack: system       # macOS/Linux兼容
+  auto-route: true
+  dns-hijack:
+    - any:53
+
+# DNS配置 - fake-ip模式确保DoH/QUIC被拦截
 dns:
   enable: true
-  enhanced-mode: redir-host  # 改为更稳定的模式
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip          # 关键：强制映射到假地址
   nameserver:
-    - 8.8.8.8
-    - 1.1.1.1
-  fallback:
-    - 8.8.4.4
-    - 1.0.0.1
+    - https://1.1.1.1/dns-query   # DoH确保安全
+    - https://8.8.8.8/dns-query
+  proxy-server-nameserver:
+    - https://1.1.1.1/dns-query   # 代理流量也走DoH
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*"
+    - +.lan
+    - +.local
+  ipv6: true                      # 启用IPv6支持
+
+# 规则提供器 - 自动更新确保规则完整性
+rule-providers:
+  Google:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Google.yaml"
+    path: ./providers/Google.yaml
+    interval: 86400
+  
+  GoogleIP:
+    type: http
+    behavior: ipcidr
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/GoogleCN.yaml"
+    path: ./providers/GoogleIP.yaml
+    interval: 86400
+
+  OpenAI:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/OpenAi.yaml"
+    path: ./providers/OpenAI.yaml
+    interval: 86400
 
 proxies:
   # 美国西雅图服务器 - AI专用
@@ -76,9 +125,12 @@ proxies:
     down: 500
 
 proxy-groups:
-  # AI服务专用组 (强制美国，固定选择)
+  # AI服务专用组 - 自动故障转移
   - name: "AI-Services"
-    type: select
+    type: fallback            # 自动切换到健康节点
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    timeout: 3000
     proxies:
       - "US-Seattle-Hysteria2"  # 优先使用Hysteria2
       - "US-Seattle-Reality"
@@ -114,7 +166,7 @@ proxy-groups:
       - "HK-CMI-Reality"
       - "US-Seattle-Reality"
 
-  # 智能选择组
+  # 智能选择组 - 延迟测试
   - name: "Auto-Select"
     type: url-test
     proxies:
@@ -123,8 +175,9 @@ proxy-groups:
       - "HK-CMI-Reality"
       - "US-Seattle-Reality"
     url: "http://www.gstatic.com/generate_204"
-    interval: 120
-    timeout: 3000
+    interval: 300             # 增加测试间隔减少负载
+    timeout: 5000             # 增加超时时间
+    tolerance: 150            # 延迟容差
 
   # 国外网站
   - name: "Foreign-Sites"
@@ -141,57 +194,22 @@ proxy-groups:
       - "DIRECT"
 
 rules:
-  # AI服务 - 走美国
-  # OpenAI 系列
-  - DOMAIN-SUFFIX,openai.com,AI-Services
-  - DOMAIN-SUFFIX,api.openai.com,AI-Services
-  - DOMAIN-SUFFIX,chatgpt.com,AI-Services
-  - DOMAIN-SUFFIX,codex.openai.com,AI-Services
-  - DOMAIN-KEYWORD,openai,AI-Services
+  # AI服务规则 - 优先使用规则提供器 (自动更新，覆盖完整)
+  - RULE-SET,Google,AI-Services
+  - RULE-SET,OpenAI,AI-Services
   
+  # 手动补充AI服务 (规则提供器未覆盖的)
   # Anthropic Claude
   - DOMAIN-SUFFIX,anthropic.com,AI-Services
   - DOMAIN-SUFFIX,api.anthropic.com,AI-Services
   - DOMAIN-SUFFIX,sandbox.api.anthropic.com,AI-Services
   - DOMAIN-SUFFIX,claude.ai,AI-Services
   
-  # Google AI 全套服务 (根据专家建议，关键域名优先级最高)
-  # Gemini Web UI & API
+  # 手动补充关键Google AI域名 (规则提供器可能未覆盖)
   - DOMAIN,gemini.google.com,AI-Services              # Gemini主站
-  - DOMAIN,aistudio.google.com,AI-Services            # Google AI Studio (新版)
-  - DOMAIN-SUFFIX,makersuite.google.com,AI-Services   # AI Studio (旧版)
-  - DOMAIN,generativelanguage.googleapis.com,AI-Services  # 唯一官方API端点
-  
-  # OAuth & 账号验证 (关键登录链路)
-  - DOMAIN,oauth2.googleapis.com,AI-Services          # OAuth令牌交换
-  - DOMAIN-SUFFIX,accounts.google.com,AI-Services     # Google账号登录
-  - DOMAIN-SUFFIX,clients6.google.com,AI-Services     # OAuth客户端
-  
-  # 开发者资源 & 未来端点
-  - DOMAIN-SUFFIX,ai.google.dev,AI-Services           # 官方文档/代码片段
-  - DOMAIN,aiplatform.googleapis.com,AI-Services      # Vertex AI Gemini
-  
-  # 其他Google AI服务
-  - DOMAIN-SUFFIX,bard.google.com,AI-Services         # Bard (历史)
-  - DOMAIN-SUFFIX,veo.google.com,AI-Services          # Veo视频模型
-  - DOMAIN-SUFFIX,withgoogle.com,AI-Services          # Google服务套件
-  - DOMAIN-SUFFIX,googleapis.com,AI-Services          # 通用API端点
-  - DOMAIN-SUFFIX,googleusercontent.com,AI-Services   # 静态资源/图片CDN
-  
-  # Google全域名 (确保所有Google服务走美国)
-  - DOMAIN-SUFFIX,google.com,AI-Services              # Google全域名覆盖
-  
-  # Google静态资源 (避免被GeoIP规则拦截)
-  - DOMAIN-SUFFIX,gstatic.com,AI-Services             # Google字体/静态资源
-  - DOMAIN-SUFFIX,google-analytics.com,AI-Services    # 分析服务
-  - DOMAIN-SUFFIX,googletagmanager.com,AI-Services    # 标签管理
-  - DOMAIN-SUFFIX,doubleclick.net,AI-Services         # Google广告服务
-  - DOMAIN-SUFFIX,googleadservices.com,AI-Services    # Google广告
-  - DOMAIN-SUFFIX,play.google.com,AI-Services         # Google Play服务
-  
-  # 关键字匹配 (兜底)
-  - DOMAIN-KEYWORD,gemini,AI-Services
-  - DOMAIN-KEYWORD,veo,AI-Services
+  - DOMAIN,aistudio.google.com,AI-Services            # Google AI Studio
+  - DOMAIN,generativelanguage.googleapis.com,AI-Services  # Gemini API端点
+  - DOMAIN-KEYWORD,gemini,AI-Services                 # 兜底匹配
   
   # Cursor IDE (添加更多子域名)
   - DOMAIN-SUFFIX,cursor.com,AI-Services
@@ -259,10 +277,7 @@ rules:
   - DOMAIN-SUFFIX,alipay.com,China-Direct
   - DOMAIN-KEYWORD,-cn,China-Direct
 
-  # Google服务 - 走代理 (除AI服务外的其他Google服务)
-  - DOMAIN-SUFFIX,google.com,Foreign-Sites
-  # googleapis.com 已移至 AI-Services (避免规则冲突)
-  # googleusercontent.com 已移至 AI-Services (避免规则冲突)
+  # 其他Google服务 (非AI) - 走代理
   - DOMAIN-SUFFIX,gmail.com,Foreign-Sites
   - DOMAIN-SUFFIX,googledrive.com,Foreign-Sites
 
